@@ -21,7 +21,13 @@ MongoDB - NoSQL документо-ориентированная база да�
 
 Апликация разработанна на базе следующих API
 
-<img src="./readme_assets/APIforum.png" width="60%">
+<img src="./readme_assets/APIforum.png" width="40%">
+
+## Система авторизации
+
+Система авторизации описанна следующим образом
+
+<img src="./readme_assets/sistemOfAuthorization.png" width="40%">
 
 
 echo "# forum-service-j60" >> README.md
