@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import telran.java48.accounting.dao.UserAccountRepository;
 import telran.java48.accounting.dto.exceptions.UserNotFoundExeption;
 import telran.java48.accounting.model.UserAccount;
+import telran.java48.security.context.SecurityContext;
 import telran.java48.security.model.User;
 
 @Component
@@ -31,6 +32,7 @@ import telran.java48.security.model.User;
 public class AuthenticationFilter implements Filter {
 
 	final UserAccountRepository userAccountRepository;
+	final SecurityContext securityContext;
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
@@ -42,30 +44,34 @@ public class AuthenticationFilter implements Filter {
 		// System.out.println(request.getHeader("Authorization"));
 
 		if (checkEndPoint(request.getMethod(), request.getServletPath())) {
-			try {
-				String[] credentials = getCredentials(request.getHeader("Authorization"));
-				UserAccount userAccount = userAccountRepository.findById(credentials[0])
-						.orElseThrow(RuntimeException::new);
-				if (!BCrypt.checkpw(credentials[1], userAccount.getPassword())) {
-					throw new RuntimeException();
+
+			String sessionId = request.getSession().getId();
+			// System.out.println(sessionId);
+			User user = securityContext.getUserBySessionId(sessionId);
+			if (user == null) {
+				try {
+					String[] credentials = getCredentials(request.getHeader("Authorization"));
+					UserAccount userAccount = userAccountRepository.findById(credentials[0])
+							.orElseThrow(RuntimeException::new);
+					if (!BCrypt.checkpw(credentials[1], userAccount.getPassword())) {
+						throw new RuntimeException();
+					}
+					user = new User(userAccount.getLogin(), userAccount.getRoles());
+					securityContext.addUserSession(sessionId, user);
+				} catch (Exception e) {
+					response.sendError(401);
+					return;
 				}
-				request = new WeappedRequest(request, userAccount.getLogin(), userAccount.getRoles());
-			} catch (Exception e) {
-				response.sendError(401);
-				return;
-			} 
-			
-			
+			}
+			request = new WeappedRequest(request, user.getName(), user.getRoles());
+
 		}
 		chain.doFilter(request, response);
 	}
 
 	private boolean checkEndPoint(String method, String path) {
-		return !(
-				(HttpMethod.POST.matches(method) 
-				&& path.matches("/account/register/?"))
-				|| path.matches("/forum/posts/\\w+(/\\w+)?/?")
-				);
+		return !((HttpMethod.POST.matches(method) && path.matches("/account/register/?"))
+				|| path.matches("/forum/posts/\\w+(/\\w+)?/?"));
 	}
 
 	private String[] getCredentials(String header) {
@@ -73,8 +79,8 @@ public class AuthenticationFilter implements Filter {
 		String decode = new String(Base64.getDecoder().decode(token));
 		return decode.split(":");
 	}
-	
-	private class WeappedRequest extends HttpServletRequestWrapper{
+
+	private class WeappedRequest extends HttpServletRequestWrapper {
 		String login;
 		Set<String> roles;
 
@@ -83,12 +89,12 @@ public class AuthenticationFilter implements Filter {
 			this.login = login;
 			this.roles = roles;
 		}
-		
+
 		@Override
 		public Principal getUserPrincipal() {
 			return new User(login, roles);
 		}
-		
+
 	}
 
 }
