@@ -3,6 +3,7 @@ package telran.java48.security.filter;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Base64;
+import java.util.Set;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import telran.java48.accounting.dao.UserAccountRepository;
 import telran.java48.accounting.dto.exceptions.UserNotFoundExeption;
 import telran.java48.accounting.model.UserAccount;
+import telran.java48.security.model.User;
 
 @Component
 @RequiredArgsConstructor
@@ -47,7 +49,7 @@ public class AuthenticationFilter implements Filter {
 				if (!BCrypt.checkpw(credentials[1], userAccount.getPassword())) {
 					throw new RuntimeException();
 				}
-				request = new WeappedRequest(request, userAccount.getLogin());
+				request = new WeappedRequest(request, userAccount.getLogin(), userAccount.getRoles());
 			} catch (Exception e) {
 				response.sendError(401);
 				return;
@@ -74,15 +76,17 @@ public class AuthenticationFilter implements Filter {
 	
 	private class WeappedRequest extends HttpServletRequestWrapper{
 		String login;
+		Set<String> roles;
 
-		public WeappedRequest(HttpServletRequest request, String login) {
+		public WeappedRequest(HttpServletRequest request, String login, Set<String> roles) {
 			super(request);
 			this.login = login;
+			this.roles = roles;
 		}
 		
 		@Override
 		public Principal getUserPrincipal() {
-			return () -> login ;
+			return new User(login, roles);
 		}
 		
 	}

@@ -20,6 +20,7 @@ import telran.java48.accounting.dao.UserAccountRepository;
 import telran.java48.accounting.model.UserAccount;
 import telran.java48.post.dao.PostRepository;
 import telran.java48.post.model.Post;
+import telran.java48.security.model.User;
 
 @Component
 @Order(60)
@@ -27,7 +28,6 @@ import telran.java48.post.model.Post;
 public class DeletePostFilter implements Filter {
 
 	final PostRepository postRepository;
-	final UserAccountRepository userAccountRepository;
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
@@ -35,7 +35,7 @@ public class DeletePostFilter implements Filter {
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) resp;
 		if (checkEndPoint(request.getMethod(), request.getServletPath())) {
-			Principal principal = request.getUserPrincipal();
+			User user = (User) request.getUserPrincipal();
 			String[] arr = request.getServletPath().split("/");
 			String postId = arr[arr.length -1];
 			Post post = postRepository.findById(postId).orElse(null);
@@ -43,9 +43,8 @@ public class DeletePostFilter implements Filter {
 				response.sendError(404);
 				return;
 			}
-			UserAccount userAccount = userAccountRepository.findById(principal.getName()).get();
-			if(!(principal.getName().equals(post.getAuthor()) 
-					|| userAccount.getRoles().contains("MODERATOR"))) {
+			if(!(user.getName().equals(post.getAuthor()) 
+					|| user.getRoles().contains("MODERATOR"))) {
 				response.sendError(403);
 				return;
 			}
