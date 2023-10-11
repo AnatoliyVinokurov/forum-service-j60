@@ -1,6 +1,7 @@
 package telran.java48.security.filter;
 
 import java.io.IOException;
+
 import java.security.Principal;
 
 import javax.servlet.Filter;
@@ -25,7 +26,7 @@ import telran.java48.accounting.model.UserAccount;
 public class DeleteUserFilter implements Filter {
 
 	final UserAccountRepository userAccountRepository;
-
+	
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
 			throws IOException, ServletException {
@@ -34,10 +35,10 @@ public class DeleteUserFilter implements Filter {
 		if (checkEndPoint(request.getMethod(), request.getServletPath())) {
 			Principal principal = request.getUserPrincipal();
 			String[] arr = request.getServletPath().split("/");
-			String user = arr[arr.length - 1];
+			String user = arr[arr.length -1];
 			UserAccount userAccount = userAccountRepository.findById(principal.getName()).get();
-			if (!(userAccount.getRoles().contains("ADMINISTRATOR") 
-					)) {
+			if(!(userAccount.getRoles().contains("ADMINISTRATOR") 
+					|| principal.getName().equalsIgnoreCase(user))) {
 				response.sendError(403);
 				return;
 			}
@@ -46,7 +47,8 @@ public class DeleteUserFilter implements Filter {
 	}
 
 	private boolean checkEndPoint(String method, String path) {
-		return HttpMethod.DELETE.matches(method) && path.matches("/account/user/\\???????????");
+		return HttpMethod.DELETE.matches(method) && path.matches("/account/user/\\w+/?");
 	}
 
+	
 }
