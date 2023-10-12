@@ -11,7 +11,8 @@ public class User implements Principal {
 	
 	String userName;
 	@Getter
-	Set<String> roles;
+	//Set<String> roles;
+	Set<Role> roles;
 	
 	@Override
 	public String getName() {

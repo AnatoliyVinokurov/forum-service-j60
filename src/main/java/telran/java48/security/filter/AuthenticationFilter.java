@@ -25,6 +25,9 @@ import telran.java48.accounting.dto.exceptions.UserNotFoundExeption;
 import telran.java48.accounting.model.UserAccount;
 import telran.java48.security.context.SecurityContext;
 import telran.java48.security.model.User;
+import telran.java48.security.model.Role;
+
+
 
 @Component
 @RequiredArgsConstructor
@@ -56,7 +59,9 @@ public class AuthenticationFilter implements Filter {
 					if (!BCrypt.checkpw(credentials[1], userAccount.getPassword())) {
 						throw new RuntimeException();
 					}
+					//TODO здесь не уверен
 					user = new User(userAccount.getLogin(), userAccount.getRoles());
+					//TODO здесь не уверен userAccount.getRoles()
 					securityContext.addUserSession(sessionId, user);
 				} catch (Exception e) {
 					response.sendError(401);
@@ -82,9 +87,9 @@ public class AuthenticationFilter implements Filter {
 
 	private class WeappedRequest extends HttpServletRequestWrapper {
 		String login;
-		Set<String> roles;
+		Set<Role> roles;
 
-		public WeappedRequest(HttpServletRequest request, String login, Set<String> roles) {
+		public WeappedRequest(HttpServletRequest request, String login, Set<Role> roles) {
 			super(request);
 			this.login = login;
 			this.roles = roles;

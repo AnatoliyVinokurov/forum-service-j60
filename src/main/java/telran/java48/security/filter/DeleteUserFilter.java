@@ -20,6 +20,9 @@ import lombok.RequiredArgsConstructor;
 import telran.java48.accounting.dao.UserAccountRepository;
 import telran.java48.accounting.model.UserAccount;
 import telran.java48.security.model.User;
+import telran.java48.security.model.Role;
+
+
 
 @Component
 @Order(40)
@@ -34,7 +37,7 @@ public class DeleteUserFilter implements Filter {
 			User user = (User) request.getUserPrincipal();
 			String[] arr = request.getServletPath().split("/");
 			String userName = arr[arr.length -1];
-			if(!(user.getRoles().contains("ADMINISTRATOR") 
+			if(!(user.getRoles().contains(Role.ADMINISTRATOR) 
 					|| user.getName().equalsIgnoreCase(userName))) {
 				response.sendError(403);
 				return;
