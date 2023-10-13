@@ -2,9 +2,6 @@ package telran.java48.security.filter;
 
 import java.io.IOException;
 import java.security.Principal;
-import telran.java48.security.model.Role;
-
-
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -33,7 +30,7 @@ public class AdminManagingRolesFilter implements Filter {
 		HttpServletResponse response = (HttpServletResponse) resp;
 		if (checkEndPoint(request.getMethod(), request.getServletPath())) {
 			User user = (User) request.getUserPrincipal();
-			if(!user.getRoles().contains(Role.ADMINISTRATOR)) {
+			if(!user.getRoles().contains("ADMINISTRATOR")) {
 				response.sendError(403, "Permission denied");
 				return;
 			}

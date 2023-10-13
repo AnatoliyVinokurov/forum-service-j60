@@ -14,9 +14,6 @@ import telran.java48.accounting.dto.UserRegisterDto;
 import telran.java48.accounting.dto.exceptions.UserExistsExeption;
 import telran.java48.accounting.dto.exceptions.UserNotFoundExeption;
 import telran.java48.accounting.model.UserAccount;
-import telran.java48.security.model.Role;
-
-
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +27,7 @@ public class UserAccountServiceImpl implements UserAccountService, CommandLineRu
 			throw new UserExistsExeption();
 		}
 		UserAccount userAccount = modelMapper.map(userRegisterDto, UserAccount.class);
-		userAccount.addRole(Role.USER);
+		userAccount.addRole("USER");
 		String password = BCrypt.hashpw(userRegisterDto.getPassword(), BCrypt.gensalt());
 		userAccount.setPassword(password);
 		userAccountRepository.save(userAccount);
@@ -64,13 +61,13 @@ public class UserAccountServiceImpl implements UserAccountService, CommandLineRu
 	}
 
 	@Override
-	public RolesDto changeRolesList(String login, Role role, boolean isAddRole) {
+	public RolesDto changeRolesList(String login, String role, boolean isAddRole) {
 		UserAccount userAccount = userAccountRepository.findById(login).orElseThrow(UserNotFoundExeption::new);
 		boolean res;
 		if(isAddRole) {
-			res = userAccount.addRole(role);
+			res = userAccount.addRole(role.toUpperCase());
 		}else {
-			res = userAccount.removeRole(role);
+			res = userAccount.removeRole(role.toUpperCase());
 		}
 		if(res) {
 			userAccountRepository.save(userAccount);
@@ -91,9 +88,9 @@ public class UserAccountServiceImpl implements UserAccountService, CommandLineRu
 		if(!userAccountRepository.existsById("admin")) {
 			String password = BCrypt.hashpw("admin", BCrypt.gensalt());
 			UserAccount userAccount = new UserAccount("admin", password, "", "");
-			userAccount.addRole(Role.USER);
-			userAccount.addRole(Role.MODERATOR);
-			userAccount.addRole(Role.ADMINISTRATOR);
+			userAccount.addRole("USER");
+			userAccount.addRole("MODERATOR");
+			userAccount.addRole("ADMINISTRATOR");
 			userAccountRepository.save(userAccount);
 		}
 	}

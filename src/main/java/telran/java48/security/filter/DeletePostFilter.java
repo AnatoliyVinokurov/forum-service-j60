@@ -21,9 +21,6 @@ import telran.java48.accounting.model.UserAccount;
 import telran.java48.post.dao.PostRepository;
 import telran.java48.post.model.Post;
 import telran.java48.security.model.User;
-import telran.java48.security.model.Role;
-
-
 
 @Component
 @Order(60)
@@ -47,7 +44,7 @@ public class DeletePostFilter implements Filter {
 				return;
 			}
 			if(!(user.getName().equals(post.getAuthor()) 
-					|| user.getRoles().contains(Role.MODERATOR))) {
+					|| user.getRoles().contains("MODERATOR"))) {
 				response.sendError(403);
 				return;
 			}

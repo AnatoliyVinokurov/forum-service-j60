@@ -8,9 +8,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.Getter;
 import lombok.Setter;
-import telran.java48.security.model.Role;
-
-
 
 @Getter
 @Document(collection = "users")
@@ -23,7 +20,7 @@ public class UserAccount {
 	String firstName;
 	@Setter
 	String lastName;
-	Set<Role> roles;
+	Set<String> roles;
 	
 	public UserAccount() {
 		roles = new HashSet<>();
@@ -37,11 +34,11 @@ public class UserAccount {
 		this.lastName = lastName;
 	}
 
-	public boolean addRole(Role  role) {
+	public boolean addRole(String role) {
 		return roles.add(role);
 	}
 
-	public boolean removeRole(Role  role) {
+	public boolean removeRole(String role) {
 		return roles.remove(role);
 	}
 
